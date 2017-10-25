@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+
+	<style type="text/css">
+</style>
+
+</head>
+<body>
+
+
+	<script type="text/javascript">
+		"use strict";
+
+		// based on https://forum.unity.com/threads/bumpmap-grayscale-to-normalmap-rgb.5714/
+		// for(int y=1;y<_source.width-1;y++){
+		// 	for(int x=1;x<_source.height-1;x++){
+		// 		float xLeft = _source.GetPixel(x-1,y).grayscale;
+		// 		float xRight = _source.GetPixel(x+1,y).grayscale;
+		// 		float yUp = _source.GetPixel(x,y-1).grayscale;
+		// 		float yDown = _source.GetPixel(x,y+1).grayscale;
+		// 		float xDelta = ((xLeft-xRight)+1)*.5f;
+		// 		float yDelta = ((yUp-yDown)+1)*.5f;
+		// 		_destination.SetPixel(x,y,new Color(xDelta,yDelta,1f,1f));
+		// 	}
+		// }
+
+		var width, height;
+		var canvas_src, ctx_src, imageData_src, imageData_dest;
+
+		var img=document.createElement('img');
+		img.src='./1.png';
+		img.onload=function(){
+			width=img.naturalWidth;
+			height=img.naturalHeight;
+
+			canvas_src=document.createElement('canvas')
+			canvas_src.id='src';
+			canvas_src.width=width;
+			canvas_src.height=height;
+			ctx_src=canvas_src.getContext('2d');
+			document.body.appendChild(canvas_src);
+			ctx_src.drawImage(img,0,0);
+
+			imageData_dest=new ImageData(width, height);
+
+			for(var i=0,len=width*height;i<len;i++){
+				var x=i%width;
+				var y=Math.floor(i/width);
+				var xLeft=ctx_src.getImageData(x-1,y,1,1).data[0];
+				var xRight=ctx_src.getImageData(x+1,y,1,1).data[0];
+				var yUp=ctx_src.getImageData(x,y-1,1,1).data[0];
+				var yDown=ctx_src.getImageData(x,y+1,1,1).data[0];
+				var xDelta=((xLeft-xRight)+255)*.5;
+				var yDelta = ((yUp-yDown)+255)*.5;
+				imageData_dest.data[i*4]=xDelta;
+				imageData_dest.data[i*4+1]=yDelta;
+				imageData_dest.data[i*4+2]=255;
+				imageData_dest.data[i*4+3]=255;
+			}
+
+			var canvas_dest=document.createElement('canvas')
+			canvas_dest.id='dest';
+			canvas_dest.width=width;
+			canvas_dest.height=height;
+			var ctx_dest=canvas_dest.getContext('2d');
+			ctx_dest.putImageData(imageData_dest, 0, 0);
+			document.body.appendChild(canvas_dest);
+		}
+		if(img.complete){
+			img.onload();
+		}
+
+
+
+	</script>
+
+</body>
+
+
+</html>
